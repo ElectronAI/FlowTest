@@ -30,7 +30,8 @@ const GenerateFlowTestModal = ({ closeFn = () => null, open = false, collectionI
 
   const [selectedModel, setSelectedModel] = useState(null);
   const [textareaValue, setTextareaValue] = useState('');
-  const [modelKey, setModelKey] = useState('');
+  const [openaiKey, setOpenAIKey] = useState('');
+  const [geminiKey, setGeminiKey] = useState('');
   const [bedrockAccessKeyId, setBedrockAccessKeyId] = useState('');
   const [bedrockSecretAccessKey, setBedrockSecretAccessKey] = useState('');
 
@@ -42,7 +43,8 @@ const GenerateFlowTestModal = ({ closeFn = () => null, open = false, collectionI
   const [showFlowtestNameError, setShowFlowtestNameError] = useState(false);
   const [showCollectionSelectionError, setShowCollectionSelectionError] = useState(false);
   const [showSelectedModelError, setSelectedModelError] = useState(false);
-  const [showModelKeyError, setShowModelKeyError] = useState(false);
+  const [showOpenAIKeyError, setShowOpenAIKeyError] = useState(false);
+  const [showGeminiKeyError, setShowGeminiKeyError] = useState(false);
   const [showDescribeFlowError, setShowDescribeFlowError] = useState(false);
   const [showBedrockAccessKeyIdError, setShowBedrockAccessKeyIdError] = useState(false);
   const [showBedrockSecretAccessKeyError, setShowBedrockSecretAccessKeyError] = useState(false);
@@ -50,7 +52,7 @@ const GenerateFlowTestModal = ({ closeFn = () => null, open = false, collectionI
 
   useEffect(() => {
     setSelectionCollection(collectionId ? collections.find((c) => c.id === collectionId) : {});
-  }, [collectionId]);
+  }, [collectionId, collections]);
 
   const resetFields = () => {
     if (!collectionId) {
@@ -60,10 +62,12 @@ const GenerateFlowTestModal = ({ closeFn = () => null, open = false, collectionI
     }
     setSelectedModel(null);
     setTextareaValue('');
-    setModelKey('');
+    setOpenAIKey('');
+    setGeminiKey('');
     setShowFlowtestNameError(false);
     setShowCollectionSelectionError(false);
-    setShowModelKeyError(false);
+    setShowOpenAIKeyError(false);
+    setShowGeminiKeyError(false);
     setShowDescribeFlowError(false);
     setSelectedModelError(false);
     setShowBedrockAccessKeyIdError(false);
@@ -289,7 +293,18 @@ const GenerateFlowTestModal = ({ closeFn = () => null, open = false, collectionI
                                     'OPENAI_APIKEY',
                                   )
                                 ) {
-                                  setModelKey(selectedCollection.dotEnvVariables['OPENAI_APIKEY']);
+                                  setOpenAIKey(selectedCollection.dotEnvVariables['OPENAI_APIKEY']);
+                                }
+                              }
+
+                              if (GENAI_MODELS.gemini) {
+                                if (
+                                  Object.prototype.hasOwnProperty.call(
+                                    selectedCollection.dotEnvVariables,
+                                    'GEMINI_APIKEY',
+                                  )
+                                ) {
+                                  setGeminiKey(selectedCollection.dotEnvVariables['GEMINI_APIKEY']);
                                 }
                               }
 
@@ -366,6 +381,35 @@ const GenerateFlowTestModal = ({ closeFn = () => null, open = false, collectionI
                       )}
                     </div>
                   )}
+                  {selectedModel === GENAI_MODELS.gemini ? (
+                    <div>
+                      <div className='mt-6 flex h-12 w-full items-center justify-center rounded border border-cyan-900 bg-background-light text-sm text-cyan-900 hover:bg-background'>
+                        <label
+                          className='flex h-full w-32 items-center border-r border-cyan-900 bg-transparent px-4'
+                          htmlFor='openAIkey'
+                        >
+                          API_KEY
+                        </label>
+                        <input
+                          id='geminikey'
+                          type='text'
+                          className='nodrag nowheel block w-full bg-transparent p-2.5 outline-none'
+                          name='keyName'
+                          placeholder='Enter your GEMINI api key'
+                          value={geminiKey.trim()}
+                          //readOnly='readonly'
+                          onChange={(e) => setGeminiKey(e.target.value)}
+                        />
+                      </div>
+                      {geminiKey.trim() === '' && showGeminiKeyError ? (
+                        <div className='py-2 text-red-600'> {`Please enter ${selectedModel} api key`}</div>
+                      ) : (
+                        ''
+                      )}
+                    </div>
+                  ) : (
+                    ''
+                  )}
                   {selectedModel === GENAI_MODELS.openai ? (
                     <div>
                       <div className='mt-6 flex h-12 w-full items-center justify-center rounded border border-cyan-900 bg-background-light text-sm text-cyan-900 hover:bg-background'>
@@ -381,12 +425,12 @@ const GenerateFlowTestModal = ({ closeFn = () => null, open = false, collectionI
                           className='nodrag nowheel block w-full bg-transparent p-2.5 outline-none'
                           name='keyName'
                           placeholder='Enter your OPENAI api key'
-                          value={modelKey.trim()}
+                          value={openaiKey.trim()}
                           //readOnly='readonly'
-                          onChange={(e) => setModelKey(e.target.value)}
+                          onChange={(e) => setOpenAIKey(e.target.value)}
                         />
                       </div>
-                      {modelKey.trim() === '' && showModelKeyError ? (
+                      {openaiKey.trim() === '' && showOpenAIKeyError ? (
                         <div className='py-2 text-red-600'> {`Please enter ${selectedModel} api key`}</div>
                       ) : (
                         ''
@@ -506,8 +550,13 @@ const GenerateFlowTestModal = ({ closeFn = () => null, open = false, collectionI
                         return;
                       }
 
-                      if (selectedModel === GENAI_MODELS.openai && (!modelKey || modelKey.trim() === '')) {
-                        setShowModelKeyError(true);
+                      if (selectedModel === GENAI_MODELS.openai && (!openaiKey || openaiKey.trim() === '')) {
+                        setShowOpenAIKeyError(true);
+                        return;
+                      }
+
+                      if (selectedModel === GENAI_MODELS.gemini && (!geminiKey || geminiKey.trim() === '')) {
+                        setShowGeminiKeyError(true);
                         return;
                       }
 
@@ -534,7 +583,8 @@ const GenerateFlowTestModal = ({ closeFn = () => null, open = false, collectionI
 
                       setShowFlowtestNameError(false);
                       setShowCollectionSelectionError(false);
-                      setShowModelKeyError(false);
+                      setShowOpenAIKeyError(false);
+                      setShowGeminiKeyError(false);
                       setShowBedrockAccessKeyIdError(false);
                       setShowBedrockSecretAccessKeyError(false);
                       setShowDescribeFlowError(false);
@@ -542,8 +592,10 @@ const GenerateFlowTestModal = ({ closeFn = () => null, open = false, collectionI
 
                       const creds =
                         selectedModel === GENAI_MODELS.openai
-                          ? modelKey
-                          : { accessKeyId: bedrockAccessKeyId, secretAccessKey: bedrockSecretAccessKey };
+                          ? openaiKey
+                          : selectedModel === GENAI_MODELS.gemini
+                            ? geminiKey
+                            : { accessKeyId: bedrockAccessKeyId, secretAccessKey: bedrockSecretAccessKey };
                       function gen() {
                         setShowLoader(true);
                         promiseWithTimeout(

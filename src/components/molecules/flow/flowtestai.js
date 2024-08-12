@@ -96,6 +96,26 @@ export const generateFlowData = async (instruction, modelName, modelKey, collect
           nodes: translateGeneratedNodesToOpenApiNodes(generatedNodes, collection.nodes),
         };
         return flowData;
+      } else if (modelName === GENAI_MODELS.gemini) {
+        if (!collection.dotEnvVariables) {
+          await ipcRenderer.invoke('renderer:create-dotenv', collection.pathname, `GEMINI_APIKEY=${modelKey}`);
+        } else if (
+          !Object.prototype.hasOwnProperty.call(collection.dotEnvVariables, 'GEMINI_APIKEY') ||
+          modelKey != collection.dotEnvVariables['GEMINI_APIKEY']
+        ) {
+          await addOrUpdateDotEnvironmentFile(collectionId, {
+            ...collection.dotEnvVariables,
+            GEMINI_APIKEY: modelKey,
+          });
+        }
+        const generatedNodes = await ipcRenderer.invoke('renderer:generate-nodes-ai', instruction, collectionId, {
+          name: GENAI_MODELS.gemini,
+          apiKey: modelKey,
+        });
+        const flowData = {
+          nodes: translateGeneratedNodesToOpenApiNodes(generatedNodes, collection.nodes),
+        };
+        return flowData;
       } else {
         return Promise.reject(new Error(`model: ${modelName} not supported`));
       }
