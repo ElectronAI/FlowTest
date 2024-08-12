@@ -152,6 +152,7 @@ Fun fact: our contributing guide itself was an external contribution 🍺
 - 🔐 Our tool integrates with various leading Large Lanugage Models (LLMs) if you wish to use the natural language to flow translation feature. You can request their api keys:
   - [OpenAI](https://platform.openai.com/)
   - [AWS Bedrock](https://console.aws.amazon.com/bedrock/)
+  - [Google GEMINI](https://ai.google.dev/gemini-api/docs/api-key)
   - [Local AI] (Coming Soon...)
 
 ## 📜 License
