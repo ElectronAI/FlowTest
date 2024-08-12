@@ -1,4 +1,5 @@
 const BedrockClaudeGenerate = require('./models/bedrock_claude');
+const GeminiGenerate = require('./models/gemini');
 const OpenAIGenerate = require('./models/openai');
 
 class FlowtestAI {
@@ -13,6 +14,11 @@ class FlowtestAI {
       const bedrock_claude = new BedrockClaudeGenerate(model.apiKey);
       const functions = await bedrock_claude.filter_functions(available_functions, user_instruction);
       return await bedrock_claude.process_user_instruction(functions, user_instruction);
+    } else if (model.name === 'GEMINI') {
+      const available_functions = await this.get_available_functions(collection);
+      const gemini = new GeminiGenerate(model.apiKey);
+      const functions = await gemini.filter_functions(available_functions, user_instruction);
+      return await gemini.process_user_instruction(functions, user_instruction);
     } else {
       throw Error(`Model ${model.name} not supported`);
     }
